@@ -1,5 +1,5 @@
 // ⚠️ API_BASE_URL Dhyan se set karna hai baad me (abhi placeholder hai)
-const API_BASE_URL = "https://TERA-BACKEND-URL.onrender.com"; 
+const API_BASE_URL = "https://mini-app-one.onrender.com"; 
 let userId = "UNKNOWN";
 
 // Initialize Telegram WebApp
