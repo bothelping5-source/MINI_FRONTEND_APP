@@ -1,0 +1,170 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: #0b101e; /* Deep dark blue */
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#app-container {
+    width: 100%;
+    max-width: 400px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    position: relative;
+}
+
+.screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    transition: opacity 0.3s ease;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Typography & Logo */
+.highlight {
+    color: #00e5ff;
+    text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+}
+.logo-area {
+    text-align: center;
+    margin-bottom: 40px;
+}
+.logo-area p { color: #8892b0; margin-top: 5px; font-size: 14px; }
+
+/* Forms & Inputs */
+.form-group {
+    width: 100%;
+    margin-bottom: 15px;
+}
+input, .dropdown {
+    width: 100%;
+    padding: 15px;
+    background-color: #1a2235;
+    border: 1px solid #2a344a;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 16px;
+    outline: none;
+}
+input:focus { border-color: #00e5ff; }
+
+/* Buttons */
+.primary-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(90deg, #0052ff 0%, #00e5ff 100%);
+    border: none;
+    border-radius: 25px;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px;
+    box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
+}
+.primary-btn:active { transform: scale(0.98); }
+
+.status-text {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #8892b0;
+    text-align: center;
+}
+
+/* Dashboard Controls */
+.header { width: 100%; padding-top: 10px; margin-bottom: 30px; text-align: left; }
+.controls {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 40px;
+}
+
+/* 🛸 RADAR ANIMATION 🛸 */
+.radar-container {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 50px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.radar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 229, 255, 0.2);
+    background: repeating-radial-gradient(
+        transparent,
+        transparent 20px,
+        rgba(0, 229, 255, 0.1) 21px,
+        transparent 22px
+    );
+    position: relative;
+    overflow: hidden;
+}
+
+.radar-sweep {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    background: conic-gradient(from 0deg, transparent 70%, rgba(0, 229, 255, 0.8) 100%);
+    transform-origin: 0 0;
+    animation: sweep 2s linear infinite;
+    border-radius: 0 100px 0 0;
+}
+
+@keyframes sweep {
+    to { transform: rotate(360deg); }
+}
+
+/* Signal Result UI */
+#signal-result {
+    position: absolute;
+    z-index: 10;
+    text-align: center;
+    background: #0b101e;
+    padding: 20px;
+    border-radius: 50%;
+    width: 160px;
+    height: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+}
+#result-direction { font-size: 28px; font-weight: bold; margin-bottom: 5px; }
+
+/* Alerts */
+#alert-box {
+    background-color: #ff4d4f;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
