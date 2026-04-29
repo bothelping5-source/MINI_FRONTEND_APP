@@ -1,119 +1,80 @@
-* { margin:0; padding:0; box-sizing:border-box; font-family: 'Courier New', Courier, monospace; } /* Terminal font */
+* { margin:0; padding:0; box-sizing:border-box; font-family: 'Courier New', Courier, monospace; }
 
-body {
-    background-color: #000212; /* Pitch black deep blue */
-    color: #fff;
-    display: flex; justify-content: center; align-items: center; height: 100vh;
-}
+body { background-color: #000212; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
 
 #terminal-container {
-    width: 100%; max-width: 400px; height: 100%;
-    border: 1px solid rgba(0, 255, 255, 0.2); /* Faint blue border */
-    padding: 15px; position: relative;
-    box-shadow: 0 0 50px rgba(0, 0, 10, 1);
+    width: 100%; max-width: 400px; height: 100%; display: flex; flex-direction: column;
+    padding: 20px; position: relative; box-shadow: 0 0 50px rgba(0, 0, 10, 1);
 }
 
-.screen { display: flex; flex-direction: column; height: 100%; position: relative; }
+.screen { display: flex; flex-direction: column; height: 100%; width: 100%; justify-content: center;}
+.hidden { display: none !important; }
 
-/* Cyber Dropdowns */
-.market-controls {
-    display: flex; gap: 10px; width: 100%; margin-bottom: 20px;
-}
-.select-wrapper {
-    flex: 1; border: 2px solid; border-radius: 8px; position: relative;
-}
-.select-wrapper.live { border-color: #008cff; box-shadow: 0 0 5px #008cff; }
-.select-wrapper.otc { border-color: #ff9100; box-shadow: 0 0 5px #ff9100; }
+/* Typo */
+.highlight { color: #00ffff; text-shadow: 0 0 10px rgba(0, 255, 255, 0.5); }
+.green { color: #00ff00; }
+.logo-area { text-align: center; margin-bottom: 40px; }
+.logo-area p { color: #8892b0; margin-top: 5px; font-size: 14px; }
+.terminal-header { text-align: center; margin-bottom: 25px; }
 
-select {
-    width: 100%; padding: 12px;
-    background: transparent; border: none;
-    color: #fff; font-size: 14px; font-weight: bold; outline: none;
+/* Inputs */
+.form-group { width: 100%; margin-bottom: 15px; }
+input {
+    width: 100%; padding: 15px; background-color: rgba(0, 255, 255, 0.05);
+    border: 1px solid #00ffff; border-radius: 5px; color: #00ffff; font-size: 16px; outline: none;
 }
+input::placeholder { color: #2a344a; }
+
+/* Dropdowns */
+.market-controls { display: flex; gap: 10px; width: 100%; margin-bottom: 20px; }
+.select-wrapper { flex: 1; border: 1px solid; border-radius: 5px; position: relative; background: #0d1a33; }
+.select-wrapper.live { border-color: #008cff; }
+.select-wrapper.otc { border-color: #ff9100; }
+select { width: 100%; padding: 10px; background: transparent; border: none; color: #fff; font-size: 12px; font-weight: bold; outline: none; }
 select option { background-color: #000; }
 
-/* Time controls as buttons */
-.time-controls {
-    display: flex; gap: 5px; width: 100%; margin-bottom: 30px;
-}
-.time-btn {
-    flex: 1; padding: 10px;
-    background-color: #0d1a33; border: 1px solid #2a344a; border-radius: 20px;
-    color: #8892b0; font-size: 12px; cursor: pointer;
-}
-.time-btn.active {
-    background: linear-gradient(90deg, #00ff00 0%, #00ffff 100%);
-    color: #000; font-weight: bold; border: none;
-    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
-}
+/* Time Buttons */
+.time-controls { display: flex; gap: 5px; width: 100%; margin-bottom: 30px; }
+.time-btn { flex: 1; padding: 10px; background-color: #0d1a33; border: 1px solid #2a344a; border-radius: 5px; color: #8892b0; font-size: 12px; cursor: pointer; }
+.time-btn.active { background: #00ffff; color: #000; font-weight: bold; border: none; box-shadow: 0 0 10px #00ffff; }
 
-/* 🌀 High-end glowing radar centerpiece 🌀 */
+/* RADAR ANIMATION */
+.radar-container { position: relative; width: 200px; height: 200px; margin: 0 auto 30px auto; display: flex; justify-content: center; align-items: center;}
 .glowing-radar {
-    width: 220px; height: 220px;
-    border-radius: 50%;
-    background: 
-        repeating-radial-gradient(transparent, transparent 15px, rgba(0, 255, 255, 0.05) 16px, transparent 18px),
-        repeating-conic-gradient(from 0deg, transparent 0%, transparent 10%, rgba(0, 255, 255, 0.05) 11%, transparent 12%);
-    border: 2px solid rgba(0, 255, 255, 0.3);
-    position: relative; overflow: hidden;
-    margin: 0 auto 40px auto;
+    width: 100%; height: 100%; border-radius: 50%;
+    background: repeating-radial-gradient(transparent, transparent 15px, rgba(0, 255, 255, 0.1) 16px, transparent 18px);
+    border: 2px solid rgba(0, 255, 255, 0.3); position: relative; overflow: hidden;
 }
 .sweep {
-    position: absolute; top:50%; left:50%;
-    width: 110px; height: 110px;
+    position: absolute; top:50%; left:50%; width: 100px; height: 100px;
     background: conic-gradient(from 0deg, transparent 60%, rgba(0, 255, 255, 0.8) 100%);
-    transform-origin: 0 0;
-    animation: sweep 2.5s linear infinite;
-    border-radius: 0 110px 0 0;
+    transform-origin: 0 0; animation: sweep 2s linear infinite; border-radius: 0 100px 0 0;
 }
 @keyframes sweep { to { transform: rotate(360deg); } }
 
-/* Glowing result popup */
+/* Result Popup */
 .neon-result {
-    position: absolute; top: 30px; left: 30px; width: 160px; height: 160px;
-    border-radius: 50%;
-    background-color: #000212; border: 3px solid;
-    display: flex; flex-direction: column; justify-content: center; align-items: center;
-    text-shadow: 0 0 10px currentColor; box-shadow: 0 0 20px currentColor;
+    position: absolute; z-index: 10; border-radius: 50%; width: 160px; height: 160px;
+    background-color: #000212; border: 3px solid; display: flex; flex-direction: column; justify-content: center; align-items: center; text-shadow: 0 0 10px currentColor; box-shadow: 0 0 20px currentColor;
 }
-/* Colors dynamically set in JS */
 
-/* Neon Action Button */
+/* Neon Button */
 .neon-btn {
-    width: 100%; padding: 18px;
-    background-color: transparent;
-    border: 2px solid #00ffff; border-radius: 5px;
-    color: #00ffff; text-transform: uppercase; font-weight: bold;
-    cursor: pointer; position: relative;
-    box-shadow: 0 0 10px #00ffff, inset 0 0 5px #00ffff;
-    animation: buttonPulse 2s infinite;
+    width: 100%; padding: 15px; background: transparent; border: 2px solid #00ffff; border-radius: 5px;
+    color: #00ffff; font-weight: bold; cursor: pointer; text-transform: uppercase;
+    box-shadow: 0 0 10px #00ffff, inset 0 0 5px #00ffff; animation: buttonPulse 2s infinite;
 }
-@keyframes buttonPulse {
-    0% { box-shadow: 0 0 5px #00ffff; }
-    50% { box-shadow: 0 0 20px #00ffff; }
-    100% { box-shadow: 0 0 5px #00ffff; }
-}
+@keyframes buttonPulse { 0%, 100% { box-shadow: 0 0 5px #00ffff; } 50% { box-shadow: 0 0 15px #00ffff; } }
 
-/* Bottom Tab Nav */
-.bottom-nav {
-    position: absolute; bottom: 0; left: 0; width: 100%;
-    display: flex;
-    background-color: #0a0e1c;
-    border-top: 1px solid #2a344a;
-}
-.nav-btn {
-    flex: 1; padding: 15px;
-    background: transparent; border: none;
-    color: #8892b0; font-size: 14px; font-weight: bold;
-}
-.nav-btn.active {
-    color: #00ffff;
-    background-color: rgba(0, 255, 255, 0.1);
-    box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.2);
-}
+/* Bottom Nav */
+.bottom-nav { position: absolute; bottom: 0; left: 0; width: 100%; display: flex; background: #0a0e1c; border-top: 1px solid #2a344a; }
+.nav-btn { flex: 1; padding: 15px; background: transparent; border: none; color: #8892b0; font-weight: bold; cursor: pointer; }
+.nav-btn.active { color: #00ffff; background: rgba(0, 255, 255, 0.1); border-top: 2px solid #00ffff; }
 
-/* Education Tab styling */
-#tab-education h3 { color: #00ffff; margin-bottom: 20px; }
+/* Alerts / Education */
+#alert-box { background: #ff4d4f; color: #fff; padding: 10px; text-align: center; font-weight: bold; margin-bottom: 15px; border-radius: 5px; border: 1px solid red; box-shadow: 0 0 10px red; }
+.status-text { margin-top: 15px; color: #8892b0; text-align: center; }
+#tab-education h3 { color: #00ffff; margin-bottom: 15px; }
 #tab-education h4 { color: #00ff00; margin-top: 15px; margin-bottom: 5px; }
-#tab-education ul { list-style: none; padding-left: 10px; color: #a1aabf; }
-#tab-education p { color: #8892b0; margin-bottom: 10px; font-size: 13px;}
+#tab-education ul { list-style: none; color: #a1aabf; font-size: 14px;}
+#tab-education p { color: #8892b0; margin-bottom: 10px; font-size: 14px;}
