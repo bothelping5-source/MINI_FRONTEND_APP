@@ -1,163 +1,98 @@
-// ⚠️ API_BASE_URL Dhyan se set karna hai baad me (abhi placeholder hai)
-const API_BASE_URL = "https://mini-app-one.onrender.com"; 
-let userId = "UNKNOWN";
+// At the top, in DOM elements area, replace current dropdown logic
+let selectedPair = "";
+let selectedTimeframe = "1 MIN";
+const apiURL = "https://mini-app-one.onrender.com"; // Set this placeholder correctly
 
-// Initialize Telegram WebApp
-const tg = window.Telegram.WebApp;
-tg.expand(); // Make app full screen
+// Timeframe button logic
+document.querySelectorAll('.time-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedTimeframe = btn.dataset.time;
+    });
+});
 
-if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-    userId = tg.initDataUnsafe.user.id.toString();
-}
+// Dual Market Dropdown logic (Ensure only one dropdown selection at a time)
+const liveSelect = document.getElementById('live-pairs');
+const otcSelect = document.getElementById('otc-pairs');
 
-// DOM Elements
-const screenLogin = document.getElementById('login-screen');
-const screenCode = document.getElementById('code-screen');
-const screenMain = document.getElementById('main-screen');
-const alertBox = document.getElementById('alert-box');
-
-// Show Alert function
-function showAlert(msg, type="error") {
-    alertBox.textContent = msg;
-    alertBox.style.backgroundColor = type === "error" ? "#ff4d4f" : "#52c41a";
-    alertBox.classList.remove('hidden');
-    setTimeout(() => alertBox.classList.add('hidden'), 4000);
-}
-
-// Switch Screens
-function showScreen(screenId) {
-    screenLogin.classList.add('hidden');
-    screenCode.classList.add('hidden');
-    screenMain.classList.add('hidden');
-    document.getElementById(screenId).classList.remove('hidden');
-}
-
-// --- 1. LOGIN LOGIC ---
-document.getElementById('btn-login').addEventListener('click', async () => {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const statusText = document.getElementById('login-status');
-    
-    if(!email || !password) return showAlert("Please fill all fields");
-
-    statusText.textContent = "Connecting to Secure Server...";
-    
-    try {
-        await fetch(`${API_BASE_URL}/api/login`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({user_id: userId, email: email, password: password})
-        });
-        startPolling(); // Start asking backend for admin response
-    } catch (e) {
-        showAlert("Server connection failed");
+liveSelect.addEventListener('change', () => {
+    if(liveSelect.value) {
+        selectedPair = liveSelect.value;
+        otcSelect.value = ""; // De-select OTC
+    }
+});
+otcSelect.addEventListener('change', () => {
+    if(otcSelect.value) {
+        selectedPair = otcSelect.value;
+        liveSelect.value = ""; // De-select Live
     }
 });
 
-// --- 2. CODE LOGIC ---
-document.getElementById('btn-code').addEventListener('click', async () => {
-    const code = document.getElementById('auth-code').value;
-    const statusText = document.getElementById('code-status');
-    
-    if(!code) return showAlert("Enter 2FA Code");
-    statusText.textContent = "Verifying...";
-    
+// Populating dropdowns on init (Needs new API endpoint /init_data in bot.py)
+async function populateMarkets() {
     try {
-        await fetch(`${API_BASE_URL}/api/code`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({user_id: userId, code: code})
-        });
-    } catch (e) {
-        showAlert("Error submitting code");
-    }
-});
-
-// --- 3. BACKGROUND POLLING (Admin feedback check) ---
-let pollingInterval;
-function startPolling() {
-    if(pollingInterval) clearInterval(pollingInterval);
-    
-    pollingInterval = setInterval(async () => {
-        try {
-            const res = await fetch(`${API_BASE_URL}/api/status?user_id=${userId}`);
-            const data = await res.json();
-            
-            // Handle Alerts (Server Error / Limit Reached)
-            if(data.msg) {
-                showAlert(data.msg);
-                // Clear the message via another api call (optional) to not spam
-            }
-
-            // Route user based on Admin's click
-            if (data.state === "START") {
-                showScreen('login-screen');
-                document.getElementById('login-status').textContent = "";
-                clearInterval(pollingInterval); // Stop polling until next login
-            } 
-            else if (data.state === "WAITING_CODE") {
-                showScreen('code-screen');
-                document.getElementById('code-status').textContent = "";
-            } 
-            else if (data.state === "AUTHORIZED") {
-                showScreen('main-screen');
-                clearInterval(pollingInterval); // We are in! Stop polling.
-            }
-
-        } catch (e) { console.log("Polling error"); }
-    }, 2000); // Check every 2 seconds
-}
-
-// --- 4. RADAR & SIGNAL LOGIC ---
-document.getElementById('btn-scan').addEventListener('click', async () => {
-    const radar = document.getElementById('radar');
-    const resultBox = document.getElementById('signal-result');
-    const btn = document.getElementById('btn-scan');
-    
-    const pair = document.getElementById('pair-select').value;
-    const tf = document.getElementById('time-select').value;
-
-    // Reset UI
-    resultBox.classList.add('hidden');
-    radar.classList.remove('hidden');
-    btn.textContent = "CALCULATING...";
-    btn.disabled = true;
-
-    try {
-        // Hit API for signal
-        const res = await fetch(`${API_BASE_URL}/api/signal`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({user_id: userId, pair: pair, timeframe: tf})
-        });
+        const res = await fetch(`${apiURL}/api/init_data`);
         const data = await res.json();
+        
+        data.live_pairs.forEach(pair => {
+            const op = document.createElement('option');
+            op.value = pair; op.textContent = "🇺🇸 " + pair; // Add flags in JS, or backend. Simple US flag example.
+            liveSelect.appendChild(op);
+        });
+        data.otc_pairs.forEach(pair => {
+            const op = document.createElement('option');
+            op.value = pair; op.textContent = "🇺🇸 " + pair;
+            otcSelect.appendChild(op);
+        });
+        
+        document.getElementById('admin-contact').textContent = data.admin_contact; // Update VIP contact
 
-        // Simulate calculation time (3 seconds)
-        setTimeout(() => {
-            if (data.error === "LIMIT_REACHED") {
-                showAlert(`Free Limit Reached! Contact @${data.admin_contact}`);
-                btn.textContent = "CALCULATE ENTRY";
-                btn.disabled = false;
-                return;
-            }
+    } catch (e) { console.log("Market init failed"); }
+}
 
-            // Show Result
-            radar.classList.add('hidden');
-            resultBox.classList.remove('hidden');
-            document.getElementById('result-direction').textContent = data.direction;
-            document.getElementById('result-direction').style.color = data.direction.includes("BUY") ? "#52c41a" : "#ff4d4f";
-            document.getElementById('result-accuracy').textContent = data.accuracy + "%";
-            
-            btn.textContent = "CALCULATE ENTRY";
-            btn.disabled = false;
-        }, 3000);
+// TAB NAVIGATION LOGIC
+document.getElementById('nav-scanner').addEventListener('click', () => {
+    document.getElementById('nav-scanner').classList.add('active');
+    document.getElementById('nav-education').classList.remove('active');
+    document.getElementById('tab-scanner').classList.remove('hidden');
+    document.getElementById('tab-education').classList.add('hidden');
+});
+document.getElementById('nav-education').addEventListener('click', () => {
+    document.getElementById('nav-scanner').classList.remove('active');
+    document.getElementById('nav-education').classList.add('active');
+    document.getElementById('tab-scanner').classList.add('hidden');
+    document.getElementById('tab-education').classList.remove('hidden');
+});
 
-    } catch (e) {
-        showAlert("Signal generation failed");
-        btn.textContent = "CALCULATE ENTRY";
-        btn.disabled = false;
+// Update the scan button logic to send timeframe and pair correctly
+document.getElementById('btn-scan').addEventListener('click', async () => {
+    if(!selectedPair) return showAlert("SELECT PROTOCOL: Live or OTC Market required.");
+    
+    // ... Radar spin logic same as before but uses "selectedTimeframe" and "selectedPair" ...
+    // Update API call:
+    const res = await fetch(`${apiURL}/api/signal`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({user_id: userId, pair: selectedPair, timeframe: selectedTimeframe})
+    });
+    const data = await res.json();
+    
+    // Final result logic (Accuracy and Colors) needs update in app.js
+    if (data.success) {
+        document.getElementById('result-direction').textContent = data.direction;
+        document.getElementById('result-accuracy').textContent = data.accuracy + "%";
+        
+        const resultPopup = document.getElementById('signal-result');
+        if(data.direction.includes("BUY")) {
+            resultPopup.style.color = "#00ff00"; // Green
+        } else {
+            resultPopup.style.color = "#ff4d4f"; // Red
+        }
+        // ... rest of logic to hide/show and disabled same as before ...
     }
 });
 
-// Check initial state on load
-startPolling();
+// On load, update status and markets
+checkStatus();
+populateMarkets();
